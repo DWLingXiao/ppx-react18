@@ -2,12 +2,18 @@
 
 import {
 	appendInitialChild,
+	Container,
 	createInstance,
 	createTextInstance
 } from 'hostConfig'
 import { FiberNode } from './fiber'
 import { NoFlags } from './fiberFlags'
-import { HostComponent, HostRoot, HostText } from './workTags'
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './workTags'
 
 export const completeWork = (wip: FiberNode) => {
 	// 比较，返回子fiberNode
@@ -50,6 +56,9 @@ export const completeWork = (wip: FiberNode) => {
 		case HostRoot:
 			bubbleProperties(wip)
 			return null
+		case FunctionComponent:
+			bubbleProperties(wip)
+			return null
 
 		default:
 			if (__DEV__) {
@@ -59,7 +68,7 @@ export const completeWork = (wip: FiberNode) => {
 	}
 }
 
-function appendAllChildren(parent: FiberNode, wip: FiberNode) {
+function appendAllChildren(parent: Container, wip: FiberNode) {
 	let node = wip.child
 
 	while (node !== null) {
@@ -97,5 +106,5 @@ function bubbleProperties(wip: FiberNode) {
 		child.return = wip
 		child = child.sibling
 	}
-	wip.subtreeFlag |= wip.subtreeFlag
+	wip.subtreeFlag |= subtreeFlag
 }

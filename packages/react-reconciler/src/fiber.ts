@@ -1,35 +1,38 @@
-import { Props, Key, Ref, ReactElememt } from 'shared/ReactTypes'
+import { Props, Key, Ref, ReactElement } from 'shared/ReactTypes'
 import { FunctionComponent, HostComponent, WorkTag } from './workTags'
 import { Flags, NoFlags } from './fiberFlags'
 import { Container } from 'hostConfig'
 
 export class FiberNode {
-	public type: any
-	public tag: WorkTag
-	public pendingProps: Props
-	public key: Key
-	public stateNode: any
-	public ref: Ref
-
-	public memoizedProps: Props | null
-	public memoizedState: any
-	public alternate: FiberNode | null
-	public flags: Flags
-	public updateQueue: unknown
-	public subtreeFlag: Flags
+	pendingProps: Props
+	memoizedProps: Props | null
+	key: Key
+	stateNode: any
+	type: any
+	ref: Ref
+	tag: WorkTag
+	flags: Flags
+	subtreeFlag: Flags
+	deletions: FiberNode[] | null
 
 	return: FiberNode | null
 	sibling: FiberNode | null
 	child: FiberNode | null
 	index: number
 
+	updateQueue: unknown
+	memoizedState: any
+
+	alternate: FiberNode | null
+
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
+		// 实例
 		this.tag = tag
-		this.key = key
+		this.key = key || null
 		this.stateNode = null
 		this.type = null
 
-		// 构成树状结构
+		// 树结构
 		this.return = null
 		this.sibling = null
 		this.child = null
@@ -37,16 +40,20 @@ export class FiberNode {
 
 		this.ref = null
 
-		// 作为工作单元
+		// 状态
 		this.pendingProps = pendingProps
 		this.memoizedProps = null
-		this.alternate = null
 		this.updateQueue = null
 		this.memoizedState = null
 
 		// 副作用
 		this.flags = NoFlags
 		this.subtreeFlag = NoFlags
+		this.deletions = null
+
+		// this.childLanes = NoLanes;
+
+		this.alternate = null
 	}
 }
 
@@ -85,11 +92,10 @@ export const createWorkInProgress = (
 	wip.child = current.child
 	wip.memoizedProps = current.memoizedProps
 	wip.memoizedState = current.memoizedState
-
 	return wip
 }
 
-export function createFiberFromElement(element: ReactElememt): FiberNode {
+export function createFiberFromElement(element: ReactElement): FiberNode {
 	const { type, key, props } = element
 	let fiberTag: WorkTag = FunctionComponent
 

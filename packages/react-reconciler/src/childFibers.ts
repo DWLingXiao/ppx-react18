@@ -1,5 +1,5 @@
 import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols'
-import { ReactElememtType } from 'shared/ReactTypes'
+import { ElementType } from 'shared/ReactTypes'
 import { createFiberFromElement, FiberNode } from './fiber'
 import { Placement } from './fiberFlags'
 import { HostText } from './workTags'
@@ -8,7 +8,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 	function reconcileSingleElement(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
-		element: ReactElememtType
+		element: ElementType
 	) {
 		// 根据reactElement创建fiber
 		const fiber = createFiberFromElement(element)
@@ -39,7 +39,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 	return function reconcileChildFibers(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
-		newChild?: ReactElememtType
+		newChild?: ElementType
 	) {
 		// return fiberNode
 		// 单节点

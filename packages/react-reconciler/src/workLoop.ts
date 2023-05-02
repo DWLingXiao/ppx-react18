@@ -48,13 +48,11 @@ function renderRoot(root: FiberRootNode) {
 
 	const finishedWork = root.current.alternate
 	root.finishedWork = finishedWork
-
 	commitRoot(root)
 }
 
 function commitRoot(root: FiberRootNode) {
 	const finishedWork = root.finishedWork
-
 	if (finishedWork === null) {
 		return
 	}
@@ -103,10 +101,13 @@ function performUntiOfWork(fiber: FiberNode) {
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber
 	do {
-		completeWork(node)
+		const next = completeWork(node)
+		if (next) {
+			workInProgress = next
+			return
+		}
 		const sibling = node.sibling
-
-		if (sibling !== null) {
+		if (sibling) {
 			workInProgress = sibling
 			return
 		}

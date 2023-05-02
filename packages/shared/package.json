@@ -1,11 +1,7 @@
 {
-	"name": "react-reconclier",
+	"name": "shared",
 	"version": "1.0.0",
-	"description": "react协调器",
-	"module": "index.js",
-	"dependencies": {
-		"shared": "workspace:*"
-	},
+	"description": "所有公用辅助方法及类型定义",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},

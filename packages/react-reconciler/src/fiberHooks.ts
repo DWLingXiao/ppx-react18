@@ -27,6 +27,7 @@ export function renderWithHooks(wip: FiberNode) {
 
 	const current = wip.alternate
 	if (current !== null) {
+		console.log(123)
 	} else {
 		currentDispatcher.current = HooksDispatcherOnMount
 	}

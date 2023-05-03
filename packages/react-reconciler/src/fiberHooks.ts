@@ -57,6 +57,7 @@ function mountState<State>(
 	}
 	const queue = createUpdateQueue<State>()
 	hook.updateQueue = queue
+	hook.memoizedState = memoizedState
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const dispatch = (queue.dispatch = dispatchSetState.bind(

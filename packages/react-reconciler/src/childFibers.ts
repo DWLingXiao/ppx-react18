@@ -1,15 +1,56 @@
 import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols'
-import { ElementType } from 'shared/ReactTypes'
-import { createFiberFromElement, FiberNode } from './fiber'
-import { Placement } from './fiberFlags'
+import { ElementType, Props } from 'shared/ReactTypes'
+import {
+	createFiberFromElement,
+	createWorkInProgress,
+	FiberNode
+} from './fiber'
+import { ChildDeletion, Placement } from './fiberFlags'
 import { HostText } from './workTags'
 
 function ChildReconciler(shouldTrackEffects: boolean) {
+	function deleteChild(returnFiber: FiberNode, childToDelete: FiberNode) {
+		if (!shouldTrackEffects) {
+			return
+		}
+		const deletions = returnFiber.deletions
+		if (deletions === null) {
+			returnFiber.deletions = [childToDelete]
+			returnFiber.flags |= ChildDeletion
+		} else {
+			deletions.push(childToDelete)
+		}
+	}
+
 	function reconcileSingleElement(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
 		element: ElementType
 	) {
+		const key = element.key
+		work: if (currentFiber !== null) {
+			if (currentFiber.key === key) {
+				// key相同，比较type
+				if (element.$$typeof === REACT_ELEMENT_TYPE) {
+					if (currentFiber.type === element.type) {
+						const existing = useFiber(currentFiber, element.props)
+						existing.return = returnFiber
+						return existing
+					}
+					// key相同，type不同也删除
+					deleteChild(returnFiber, currentFiber)
+					break work
+				} else {
+					if (__DEV__) {
+						console.warn('还未实现的react类型', currentFiber)
+						break work
+					}
+				}
+			} else {
+				// key不同，删除旧节点
+				deleteChild(returnFiber, currentFiber)
+			}
+		}
 		// 根据reactElement创建fiber
 		const fiber = createFiberFromElement(element)
 		fiber.return = returnFiber
@@ -22,6 +63,15 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		currentFiber: FiberNode | null,
 		content: string | number
 	) {
+		if (currentFiber !== null) {
+			// update
+			if (currentFiber.tag === HostText) {
+				const existing = useFiber(currentFiber, { content })
+				existing.return = returnFiber
+				return existing
+			}
+			deleteChild(returnFiber, currentFiber)
+		}
 		// 根据reactElement创建fiber
 		const fiber = new FiberNode(HostText, { content }, null)
 		fiber.return = returnFiber
@@ -47,7 +97,11 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 			switch (newChild.$$typeof) {
 				case REACT_ELEMENT_TYPE:
 					return placeSingleChild(
-						reconcileSingleElement(returnFiber, currentFiber, newChild)
+						reconcileSingleElement(
+							returnFiber,
+							currentFiber,
+							newChild
+						) as FiberNode
 					)
 				default:
 					if (__DEV__) {
@@ -66,10 +120,22 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 			)
 		}
 
+		if (currentFiber !== null) {
+			// 兜底删除
+			deleteChild(returnFiber, currentFiber)
+		}
+
 		if (__DEV__) {
 			console.warn('未实现的reconcile类型', newChild)
 		}
 		return null
+	}
+
+	function useFiber(fiber: FiberNode, pendingProps: Props): FiberNode {
+		const clone = createWorkInProgress(fiber, pendingProps)
+		clone.index = 0
+		clone.sibling = null
+		return clone
 	}
 }
 
